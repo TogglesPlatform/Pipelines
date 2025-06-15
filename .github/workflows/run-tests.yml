@@ -1,0 +1,32 @@
+name: Run Tests
+
+on:
+  workflow_call:
+    inputs:
+      xcode-version:
+        required: false
+        type: string
+        default: '16.4.0'
+        description: 'The Xcode version to use'
+      runner:
+        required: false
+        type: string
+        default: 'macos-15'
+        description: 'The runner to use for the workflow'
+  
+jobs:
+  run-tests:
+    name: Run Tests ${{ github.ref_name }}
+    runs-on: ${{ inputs.runner }}
+
+    steps:
+    - name: Code Checkout
+      uses: actions/checkout@v4
+
+    - name: Select Xcode
+      uses: TogglesPlatform/Pipelines/actions/select-xcode@v1
+      with:
+        xcode-version: ${{ inputs.xcode-version }}
+
+    - name: Run tests
+      run: swift test

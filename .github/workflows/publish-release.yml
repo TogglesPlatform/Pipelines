@@ -1,0 +1,63 @@
+name: Publish Release
+
+on:
+  workflow_call:
+    inputs:
+      xcode-version:
+        required: false
+        type: string
+        default: '16.4.0'
+        description: 'The Xcode version to use'
+      tool-name:
+        required: true
+        type: string
+        description: 'The name of the tool to build'
+      runner:
+        required: false
+        type: string
+        default: 'macos-15'
+        description: 'The runner to use for the workflow'
+    secrets:
+      github-token:
+        required: true
+        description: 'GitHub token for creating releases and uploading assets'
+
+jobs:
+  publish-release:
+    name: Publish release ${{ github.ref_name }}
+    runs-on: ${{ inputs.runner }}
+    
+    steps:
+    - name: Show macOS version (${{ inputs.xcode-version }})
+      run: sw_vers
+
+    - name: Code Checkout
+      uses: actions/checkout@v4
+
+    - name: Select Xcode
+      uses: TogglesPlatform/Pipelines/actions/select-xcode@v1
+      with:
+        xcode-version: ${{ inputs.xcode-version }}
+
+    - name: Create release
+      id: create-release
+      uses: TogglesPlatform/Pipelines/actions/create-release@v1
+      with:
+        gh-token: ${{ secrets.github-token }}
+        repository: ${{ github.repository }}
+        tag-name: ${{ github.ref_name }}
+
+    - name: Create universal binary
+      id: create-universal-binary
+      uses: TogglesPlatform/Pipelines/actions/create-universal-binary@v1
+      with:
+        tool-name: ${{ inputs.tool-name }}
+
+    - name: Upload universal binary
+      uses: TogglesPlatform/Pipelines/actions/upload-release-asset@v1
+      with:
+        asset-filename: ${{ steps.create-universal-binary.outputs.zip-filename }}
+        asset-path: ${{ steps.create-universal-binary.outputs.zip-path }}
+        gh-token: ${{ secrets.github-token }}
+        repository: ${{ github.repository }}
+        release-id: ${{ steps.create-release.outputs.release-id }}
