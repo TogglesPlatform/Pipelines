@@ -17,10 +17,6 @@ on:
         type: string
         default: 'macos-26'
         description: 'The runner to use for the workflow'
-    secrets:
-      github-token:
-        required: true
-        description: 'GitHub token for creating releases and uploading assets'
 
 jobs:
   publish-release:
@@ -43,7 +39,7 @@ jobs:
       id: create-release
       uses: TogglesPlatform/Pipelines/actions/create-release@v1
       with:
-        gh-token: ${{ secrets.github-token }}
+        gh-token: ${{ secrets.GITHUB_TOKEN }}
         repository: ${{ github.repository }}
         tag-name: ${{ github.ref_name }}
 
@@ -58,6 +54,6 @@ jobs:
       with:
         asset-filename: ${{ steps.create-universal-binary.outputs.zip-filename }}
         asset-path: ${{ steps.create-universal-binary.outputs.zip-path }}
-        gh-token: ${{ secrets.github-token }}
+        gh-token: ${{ secrets.GITHUB_TOKEN }}
         repository: ${{ github.repository }}
         release-id: ${{ steps.create-release.outputs.release-id }}
