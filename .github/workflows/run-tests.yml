@@ -6,12 +6,12 @@ on:
       xcode-version:
         required: false
         type: string
-        default: '16.4.0'
+        default: '26.6.0'
         description: 'The Xcode version to use'
       runner:
         required: false
         type: string
-        default: 'macos-15'
+        default: 'macos-26'
         description: 'The runner to use for the workflow'
   
 jobs:
